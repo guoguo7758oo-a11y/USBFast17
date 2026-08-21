@@ -15,19 +15,40 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Theos
+        shell: bash
         run: |
-          git clone --depth=1 https://github.com/theos/theos.git "$GITHUB_WORKSPACE/theos"
+          set -e
 
-          chmod +x "$GITHUB_WORKSPACE/theos/bin/dm.pl"
+          # Install Theos
+          git clone --recursive --depth=1 https://github.com/theos/theos.git "$GITHUB_WORKSPACE/theos"
 
+          # Install dm.pl
+          git clone --depth=1 https://github.com/theos/dm.pl.git "$GITHUB_WORKSPACE/dm.pl"
+          chmod +x "$GITHUB_WORKSPACE/dm.pl/dm.pl"
+
+          # Set Theos environment
           echo "THEOS=$GITHUB_WORKSPACE/theos" >> "$GITHUB_ENV"
-          echo "$GITHUB_WORKSPACE/theos/bin" >> "$GITHUB_PATH"
 
-          "$GITHUB_WORKSPACE/theos/bin/dm.pl" --help
+          # Put dm.pl into PATH
+          echo "$GITHUB_WORKSPACE/dm.pl" >> "$GITHUB_PATH"
+
+          # Check installation
+          echo "THEOS=$GITHUB_WORKSPACE/theos"
+          echo "dm.pl location:"
+          which dm.pl
+          dm.pl --help
 
       - name: Build package
+        shell: bash
         run: |
+          set -e
+
           export THEOS="$GITHUB_WORKSPACE/theos"
+
+          echo "THEOS=$THEOS"
+          echo "dm.pl location:"
+          which dm.pl
+
           make package FINALPACKAGE=1
 
       - name: Upload deb
