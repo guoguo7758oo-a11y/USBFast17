@@ -15,37 +15,22 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Theos
-        shell: bash
         run: |
-          set -e
+          brew install ldid xz
+          git clone --recursive https://github.com/theos/theos.git "$GITHUB_WORKSPACE/theos"
+          echo "THEOS=$GITHUB_WORKSPACE/theos" >> "$GITHUB_ENV"
 
-          git clone --recursive --depth=1 https://github.com/theos/theos.git "$GITHUB_WORKSPACE/theos"
-
+      - name: Verify Theos
+        run: |
           export THEOS="$GITHUB_WORKSPACE/theos"
-
-          echo "THEOS=$THEOS" >> "$GITHUB_ENV"
-
-          # Make Theos tools available
-          echo "$THEOS/bin" >> "$GITHUB_PATH"
-
-          # Make dm.pl available
-          chmod +x "$THEOS/vendor/dm.pl/dm.pl"
-          echo "$THEOS/vendor/dm.pl" >> "$GITHUB_PATH"
-
-          echo "Checking dm.pl..."
-          "$THEOS/vendor/dm.pl/dm.pl" --help
+          echo "THEOS=$THEOS"
+          ls -la "$THEOS"
+          ls -la "$THEOS/vendor/dm.pl"
+          test -f "$THEOS/vendor/dm.pl/dm.pl"
 
       - name: Build package
-        shell: bash
         run: |
-          set -e
-
           export THEOS="$GITHUB_WORKSPACE/theos"
-
-          echo "THEOS=$THEOS"
-          echo "Checking dm.pl..."
-          "$THEOS/vendor/dm.pl/dm.pl" --help
-
           make package FINALPACKAGE=1
 
       - name: Upload deb
