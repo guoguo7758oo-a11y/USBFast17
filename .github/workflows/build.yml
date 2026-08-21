@@ -19,24 +19,21 @@ jobs:
         run: |
           set -e
 
-          # Install Theos
           git clone --recursive --depth=1 https://github.com/theos/theos.git "$GITHUB_WORKSPACE/theos"
 
-          # Install dm.pl
-          git clone --depth=1 https://github.com/theos/dm.pl.git "$GITHUB_WORKSPACE/dm.pl"
-          chmod +x "$GITHUB_WORKSPACE/dm.pl/dm.pl"
+          export THEOS="$GITHUB_WORKSPACE/theos"
 
-          # Set Theos environment
-          echo "THEOS=$GITHUB_WORKSPACE/theos" >> "$GITHUB_ENV"
+          echo "THEOS=$THEOS" >> "$GITHUB_ENV"
 
-          # Put dm.pl into PATH
-          echo "$GITHUB_WORKSPACE/dm.pl" >> "$GITHUB_PATH"
+          # Make Theos tools available
+          echo "$THEOS/bin" >> "$GITHUB_PATH"
 
-          # Check installation
-          echo "THEOS=$GITHUB_WORKSPACE/theos"
-          echo "dm.pl location:"
-          which dm.pl
-          dm.pl --help
+          # Make dm.pl available
+          chmod +x "$THEOS/vendor/dm.pl/dm.pl"
+          echo "$THEOS/vendor/dm.pl" >> "$GITHUB_PATH"
+
+          echo "Checking dm.pl..."
+          "$THEOS/vendor/dm.pl/dm.pl" --help
 
       - name: Build package
         shell: bash
@@ -46,8 +43,8 @@ jobs:
           export THEOS="$GITHUB_WORKSPACE/theos"
 
           echo "THEOS=$THEOS"
-          echo "dm.pl location:"
-          which dm.pl
+          echo "Checking dm.pl..."
+          "$THEOS/vendor/dm.pl/dm.pl" --help
 
           make package FINALPACKAGE=1
 
