@@ -19,50 +19,48 @@ jobs:
           brew install dpkg ldid
 
       - name: Install Theos
-        run: |
-          git clone --depth=1 --recurse-submodules https://github.com/theos/theos.git "$GITHUB_WORKSPACE/theos"
-          echo "THEOS=$GITHUB_WORKSPACE/theos" >> "$GITHUB_ENV"
+        uses: Randomblock1/theos-action@v1
+        with:
+          theos-dir: '${{ github.workspace }}/theos'
+          theos-src: 'https://github.com/theos/theos'
+          theos-sdks: 'https://github.com/theos/sdks'
+          theos-sdks-branch: 'master'
 
       - name: Verify tools
         run: |
-          export THEOS="$GITHUB_WORKSPACE/theos"
+          export THEOS="${{ github.workspace }}/theos"
+          export PATH="$THEOS/bin:$PATH"
 
           echo "Checking ldid..."
           which ldid
           ldid -h || true
 
           echo "Checking Theos..."
+          test -f "$THEOS/bin/nic.pl"
           test -f "$THEOS/bin/dm.pl"
 
-          echo "Theos and ldid OK"
+          echo "Checking SDK..."
+          ls -la "$THEOS/sdks"
 
-      - name: Create package control
+          echo "Theos and SDK OK"
+
+      - name: Clean build
         run: |
-          mkdir -p layout/DEBIAN
+          export THEOS="${{ github.workspace }}/theos"
+          export PATH="$THEOS/bin:$PATH"
 
-          cat > layout/DEBIAN/control <<'EOF'
-          Package: com.usbfast17
-          Name: USBFast17
-          Version: 1.0
-          Architecture: iphoneos-arm64
-          Description: USBFast17
-          Maintainer: USBFast17
-          Author: USBFast17
-          Section: Tweaks
-          EOF
-
-          echo "Created package control:"
-          cat layout/DEBIAN/control
+          make clean || true
 
       - name: Build package
         run: |
-          export THEOS="$GITHUB_WORKSPACE/theos"
-          export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+          export THEOS="${{ github.workspace }}/theos"
+          export PATH="$THEOS/bin:$PATH"
 
           echo "THEOS=$THEOS"
-          echo "ldid=$(which ldid)"
+          echo "SDKs:"
+          ls -la "$THEOS/sdks"
 
-          make package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
+          make clean package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
 
       - name: List packages
         if: always()
@@ -76,3 +74,4 @@ jobs:
         with:
           name: USBFast17-deb
           path: packages/*.deb
+          if-no-files-found: error
