@@ -1,28 +1,22 @@
 #import <UIKit/UIKit.h>
+#import <Preferences/PSListController.h>
+#import <Preferences/PSSpecifier.h>
 
-@interface PSSpecifier : NSObject
-@end
-
-@interface PSListController : UITableViewController
-
-- (NSArray *)loadSpecifiersFromPlistName:(NSString *)name
-                                  target:(id)target;
-
-@end
-
-@interface USBFast17PrefsListController : PSListController
+@interface USBFast17PrefsListController : PSListController {
+    NSArray *_usbFast17Specifiers;
+}
 @end
 
 @implementation USBFast17PrefsListController
 
 - (NSArray *)specifiers {
-    if (!_specifiers) {
-        _specifiers =
+    if (!_usbFast17Specifiers) {
+        _usbFast17Specifiers =
             [self loadSpecifiersFromPlistName:@"Root"
-                                       target:self];
+                                        target:self];
     }
 
-    return _specifiers;
+    return _usbFast17Specifiers;
 }
 
 - (void)viewDidLoad {
