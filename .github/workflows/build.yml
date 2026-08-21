@@ -20,11 +20,13 @@ jobs:
           brew install dpkg ldid
           git clone --depth=1 https://github.com/theos/theos.git "$GITHUB_WORKSPACE/theos"
           echo "THEOS=$GITHUB_WORKSPACE/theos" >> "$GITHUB_ENV"
+          echo "$GITHUB_WORKSPACE/theos/bin" >> "$GITHUB_PATH"
 
       - name: Build package
         shell: bash
         run: |
           export THEOS="$GITHUB_WORKSPACE/theos"
+          export PATH="$THEOS/bin:$PATH"
           make package FINALPACKAGE=1
 
       - name: Upload deb
