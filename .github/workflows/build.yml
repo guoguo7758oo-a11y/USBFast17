@@ -16,24 +16,48 @@ jobs:
 
       - name: Install Theos
         run: |
-          brew install ldid xz
-          git clone --recursive https://github.com/theos/theos.git "$GITHUB_WORKSPACE/theos"
+          brew install dpkg
+          git clone --depth=1 --recurse-submodules https://github.com/theos/theos.git "$GITHUB_WORKSPACE/theos"
           echo "THEOS=$GITHUB_WORKSPACE/theos" >> "$GITHUB_ENV"
 
       - name: Verify Theos
         run: |
           export THEOS="$GITHUB_WORKSPACE/theos"
           echo "THEOS=$THEOS"
-          ls -la "$THEOS"
-          ls -la "$THEOS/vendor/dm.pl"
-          test -f "$THEOS/vendor/dm.pl/dm.pl"
+          test -f "$THEOS/bin/dm.pl"
+          echo "Theos OK"
+
+      - name: Create package control
+        run: |
+          mkdir -p layout/DEBIAN
+
+          cat > layout/DEBIAN/control <<'EOF'
+          Package: com.usbfast17
+          Name: USBFast17
+          Version: 1.0
+          Architecture: iphoneos-arm64
+          Description: USBFast17
+          Maintainer: USBFast17
+          Author: USBFast17
+          Section: Tweaks
+          EOF
+
+          echo "Created package control:"
+          cat layout/DEBIAN/control
 
       - name: Build package
         run: |
           export THEOS="$GITHUB_WORKSPACE/theos"
           make package FINALPACKAGE=1
 
+      - name: List packages
+        if: always()
+        run: |
+          echo "Package files:"
+          find packages -type f -maxdepth 2 -print 2>/dev/null || true
+
       - name: Upload deb
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: USBFast17-deb
