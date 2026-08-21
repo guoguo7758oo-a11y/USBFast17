@@ -6,7 +6,8 @@ include $(THEOS)/makefiles/common.mk
 TWEAK_NAME := USBFast17
 
 USBFast17_FILES := Tweak.xm
-USBFast17_CFLAGS := -fobjc-arc
+USBFast17_CFLAGS := -fobjc-arc -fno-modules
+USBFast17_CCFLAGS := -std=c++17 -fno-modules
 
 BUNDLE_NAME := USBFast17Prefs
 
