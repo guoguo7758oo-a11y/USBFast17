@@ -1,0 +1,8 @@
+Package: com.usbfast17
+Name: USBFast17
+Version: 1.1
+Architecture: iphoneos-arm64
+Description: USBFast17 diagnostic USB/power monitor with Settings
+Maintainer: USBFast17
+Author: USBFast17
+Section: Tweaks
