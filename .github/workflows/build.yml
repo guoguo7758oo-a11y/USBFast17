@@ -14,14 +14,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-              - name: Install Theos
-          run: |
-            git clone --depth=1 https://github.com/theos/theos.git "$GITHUB_WORKSPACE/theos"
-            echo "THEOS=$GITHUB_WORKSPACE/theos" >> "$GITHUB_ENV"
-            echo "$GITHUB_WORKSPACE/theos/bin" >> "$GITHUB_PATH"
-            chmod +x "$GITHUB_WORKSPACE/theos/bin/dm.pl"
+      - name: Install Theos
+        shell: bash
+        run: |
+          brew install dpkg ldid
+          git clone --depth=1 https://github.com/theos/theos.git "$GITHUB_WORKSPACE/theos"
+          echo "THEOS=$GITHUB_WORKSPACE/theos" >> "$GITHUB_ENV"
 
       - name: Build package
+        shell: bash
         run: |
           export THEOS="$GITHUB_WORKSPACE/theos"
           make package FINALPACKAGE=1
