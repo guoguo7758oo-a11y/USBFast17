@@ -14,18 +14,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install dependencies
+        run: |
+          brew install dpkg ldid
+
       - name: Install Theos
         run: |
-          brew install dpkg
           git clone --depth=1 --recurse-submodules https://github.com/theos/theos.git "$GITHUB_WORKSPACE/theos"
           echo "THEOS=$GITHUB_WORKSPACE/theos" >> "$GITHUB_ENV"
 
-      - name: Verify Theos
+      - name: Verify tools
         run: |
           export THEOS="$GITHUB_WORKSPACE/theos"
-          echo "THEOS=$THEOS"
+
+          echo "Checking ldid..."
+          which ldid
+          ldid -h || true
+
+          echo "Checking Theos..."
           test -f "$THEOS/bin/dm.pl"
-          echo "Theos OK"
+
+          echo "Theos and ldid OK"
 
       - name: Create package control
         run: |
@@ -48,6 +57,11 @@ jobs:
       - name: Build package
         run: |
           export THEOS="$GITHUB_WORKSPACE/theos"
+          export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+
+          echo "THEOS=$THEOS"
+          echo "ldid=$(which ldid)"
+
           make package FINALPACKAGE=1
 
       - name: List packages
